@@ -1,29 +1,18 @@
-try {
-  chrome.runtime.onInstalled.addListener(() => {
-    chrome.contextMenus.create({
-      id: "copyText",
-      title: "クリップボードに本文をコピー",
-      contexts: ["all"]
-    });
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "copyText",
+    title: "テキストをコピー",
+    contexts: ["page"]
   });
+});
 
-  chrome.contextMenus.onClicked.addListener((info, tab) => {
-    if (info.menuItemId === "copyText") {
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: copyTextToClipboard
-      });
-    }
-  });
-
-  function copyTextToClipboard() {
-    var text = document.getElementById('novel_honbun').innerText;
-    navigator.clipboard.writeText(text).then(function() {
-      console.log('クリップボードにコピーしました');
-    }, function(err) {
-      console.error('エラー: ', err);
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "copyText") {
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['content.js']
+    }, () => {
+      chrome.tabs.sendMessage(tab.id, { action: "copyText" });
     });
   }
-} catch (e) {
-  console.error('エラー: ', e);
-}
+});
